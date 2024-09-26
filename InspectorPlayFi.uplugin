@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "InspectorPlayFi",
+	"Description": "Plugin that is responsible for sending data to PlayFi servers from clients.",
+	"Category": "Other",
+	"CreatedBy": "Hryhorenko Yurii",
+	"CreatedByURL": "https://t.me/liemander",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": true,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "InspectorPlayFi",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
