@@ -38,6 +38,7 @@ public class InspectorPlayFi : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+				"RHI"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
