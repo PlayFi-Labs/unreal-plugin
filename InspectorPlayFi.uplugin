@@ -4,19 +4,24 @@
 	"VersionName": "1.0",
 	"FriendlyName": "InspectorPlayFi",
 	"Description": "Plugin that is responsible for sending data to PlayFi servers from clients.",
-	"Category": "Other",
+	"Category": "Screen Record",
 	"CreatedBy": "Hryhorenko Yurii",
 	"CreatedByURL": "https://t.me/liemander",
 	"DocsURL": "",
 	"MarketplaceURL": "",
 	"SupportURL": "",
 	"CanContainContent": true,
-	"IsBetaVersion": true,
+	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
 	"Installed": false,
 	"Modules": [
 		{
 			"Name": "InspectorPlayFi",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "InspectorPlayFiRuntime",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}

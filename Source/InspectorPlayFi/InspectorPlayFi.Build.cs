@@ -34,11 +34,15 @@ public class InspectorPlayFi : ModuleRules
 		PrivateDependencyModuleNames.AddRange(
 			new string[]
 			{
+				"Projects",
+				"InputCore",
+				"EditorFramework",
+				"UnrealEd",
+				"ToolMenus",
 				"CoreUObject",
 				"Engine",
 				"Slate",
 				"SlateCore",
-				"RHI"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
