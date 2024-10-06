@@ -7,9 +7,9 @@
 	"Category": "Screen Record",
 	"CreatedBy": "Hryhorenko Yurii",
 	"CreatedByURL": "https://t.me/liemander",
-	"DocsURL": "",
+	"DocsURL": "https://docs.google.com/document/d/18J9gPMA4EJg___haBDeQEew3zVhoa6d8sVUeQOEJZT4/edit?usp=sharing",
 	"MarketplaceURL": "",
-	"SupportURL": "",
+	"SupportURL": "https://t.me/liemander",
 	"CanContainContent": true,
 	"IsBetaVersion": false,
 	"IsExperimentalVersion": false,
@@ -24,6 +24,12 @@
 			"Name": "InspectorPlayFiRuntime",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "EditorScriptingUtilities",
+			"Enabled": true
 		}
 	]
 }

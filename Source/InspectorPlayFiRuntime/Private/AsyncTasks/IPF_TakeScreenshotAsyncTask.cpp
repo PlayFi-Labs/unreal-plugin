@@ -1,17 +1,14 @@
 // PlayFi data Inspector. All rights reserved.
 
 #include "AsyncTasks/IPF_TakeScreenshotAsyncTask.h"
-#include "IImageWrapper.h"
-#include "IImageWrapperModule.h"
-
-DEFINE_LOG_CATEGORY_STATIC(LogTakeScreenshotAsyncTask, All, All)
+#include "Settings/IPF_SettingsContainer.h"
 
 UIPF_TakeScreenshotAsyncTask* UIPF_TakeScreenshotAsyncTask::TakeScreenshotAsyncTask(const UObject* WorldContextObject)
 {
     UIPF_TakeScreenshotAsyncTask* Action = NewObject<UIPF_TakeScreenshotAsyncTask>();
     if (!Action || !WorldContextObject)
     {
-        UE_LOG(LogTakeScreenshotAsyncTask, Error, TEXT("Failed to create TakeScreenshot async task!"));
+        UE_LOG(LogInspectorAsyncTask, Error, TEXT("Failed to create TakeScreenshot async task!"));
         return nullptr;
     }
 
@@ -22,6 +19,8 @@ UIPF_TakeScreenshotAsyncTask* UIPF_TakeScreenshotAsyncTask::TakeScreenshotAsyncT
 
 void UIPF_TakeScreenshotAsyncTask::Activate()
 {
+    Super::Activate();
+
     SlateApplication = &FSlateApplication::Get();
     if (!SlateApplication)
     {
@@ -66,37 +65,31 @@ void UIPF_TakeScreenshotAsyncTask::OnBackBufferReady_RenderThread(SWindow& Windo
 
     SlateApplication->GetRenderer()->OnBackBufferReadyToPresent().RemoveAll(this);
 
-    IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(TEXT("ImageWrapper"));
-    const TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(EImageFormat::JPEG);
-
-    if (ImageWrapper->SetRaw(OutColors.GetData(), OutColors.Num() * OutColors.GetTypeSize(), CaptureRect.Width(), CaptureRect.Height(), ERGBFormat::BGRA, 8))
+    const auto InspectorSettings = GetInspectorSettings();
+    if (InspectorSettings.bSaveImageToDisk)
     {
-        const TArray64<uint8>& Bytes = ImageWrapper->GetCompressed(0);
-        const TArray<uint8> NormalizedArray(Bytes.GetData(), static_cast<int32>(Bytes.Num()));
+        const TArray<uint8>& Bytes = GetImageBytesFromColors(OutColors, CaptureRect.Width(), CaptureRect.Height());
+        const FString FilePath = FPaths::ProjectDir() / InspectorSettings.SaveImageToDiskPath;
+        const bool bSavedSuccess = FFileHelper::SaveArrayToFile(Bytes, *FilePath);
 
-        const FString FilePath = FPaths::ProjectDir() / TEXT("ScreenshotAsync.jpeg");
-        const bool bIsScreenshotSaved = FFileHelper::SaveArrayToFile(Bytes, *FilePath);
-        if (!bIsScreenshotSaved)
+        if (!bSavedSuccess)
         {
-            UE_LOG(LogTemp, Error, TEXT("Screenshot Save fail"));
+            UE_LOG(LogInspectorAsyncTask, Error, TEXT("Failed to save image in path: %s"), *FilePath);
         }
-        SetReadyToDestroy();
-        OnSuccess.Broadcast("Success", NormalizedArray);
     }
-    else
-    {
-        TaskFailedWithReason("Failed to set raw image data for ImageWrapper!");
-    }
+
+    SetReadyToDestroy();
+    OnSuccess.Broadcast("Success", OutColors, CaptureRect.Width(), CaptureRect.Height());
 }
 
 void UIPF_TakeScreenshotAsyncTask::TaskFailedWithReason(const FString& Reason)
 {
-    UE_LOG(LogTakeScreenshotAsyncTask, Error, TEXT("%s"), *Reason);
-
     if (SlateApplication)
     {
         SlateApplication->GetRenderer()->OnBackBufferReadyToPresent().RemoveAll(this);
     }
+
+    LogMessageIfDebugEnabled(Reason, true);
+    OnFailed.Broadcast(Reason, TArray<FColor>(), 0, 0);
     SetReadyToDestroy();
-    OnFailed.Broadcast(Reason, TArray<uint8>());
 }

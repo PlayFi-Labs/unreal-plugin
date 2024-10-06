@@ -3,25 +3,46 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Settings/IPF_SettingsContainer.h"
 #include "Subsystems/GameInstanceSubsystem.h"
 #include "IPF_InspectorSubsystem.generated.h"
 
-UCLASS()
+class UIPF_SettingsContainer;
+
+UCLASS(Blueprintable, BlueprintType)
 class INSPECTORPLAYFIRUNTIME_API UIPF_InspectorSubsystem : public UGameInstanceSubsystem
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 
 public:
+    UPROPERTY(BlueprintReadWrite, Category = "InspectorPlayFi")
+    FString UserID;
+
+    // Stores the FColor array of the last image that was successfully sent to the server. Used to check for duplicates.
+    TArray<FColor> LastImageColors;
+
+public:
+    UIPF_InspectorSubsystem();
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-    virtual void Deinitialize() override;
+
+    FInspectorSettings GetInspectorSettings() const;
+
+    /** Allows you to enable / disable Inspector during runtime. If Inspector was completely turned off during method call - timer will start. */
+    UFUNCTION(BlueprintCallable, Category = "InspectorPlayFi")
+    void EnableInspector(bool bEnable);
 
 protected:
-    UPROPERTY()
-    float ScreenshotTimerRate = 5.f;
-
-protected:
+    void StartScreenshotTimer();
     void OnScreenshotTimerUpdate();
+    void LogMessageIfDebugEnabled(const FString& Message, bool bError = false);
+
+    UFUNCTION()
+    void OnSuccessfullyTakenScreenshot(const FString& ResponseMessage, const TArray<FColor>& ImageColors, const int32& Width, const int32& Height);
 
 private:
+    UPROPERTY()
+    UIPF_SettingsContainer* SettingsContainer = nullptr;
+
+    TSubclassOf<UIPF_SettingsContainer> SettingsContainerClass;
     FTimerHandle ScreenshotTimerHandle;
 };

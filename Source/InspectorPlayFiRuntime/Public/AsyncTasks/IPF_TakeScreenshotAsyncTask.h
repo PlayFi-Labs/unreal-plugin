@@ -3,15 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Kismet/BlueprintAsyncActionBase.h"
+#include "IPF_BaseAsyncTask.h"
 #include "IPF_TakeScreenshotAsyncTask.generated.h"
 
 UCLASS()
-class INSPECTORPLAYFIRUNTIME_API UIPF_TakeScreenshotAsyncTask : public UBlueprintAsyncActionBase
+class INSPECTORPLAYFIRUNTIME_API UIPF_TakeScreenshotAsyncTask : public UIPF_BaseAsyncTask
 {
     GENERATED_BODY()
 
-    DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnTakeScreenshotCompleted, const FString&, ResponceMessage, const TArray<uint8>&, ImageBytes);
+    DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnTakeScreenshotCompleted, const FString&, ResponseMessage, const TArray<FColor>&, ImageColors, const int32&, Width, const int32&, Height);
 
 public:
     UPROPERTY(BlueprintAssignable)
@@ -34,8 +34,5 @@ protected:
     void TaskFailedWithReason(const FString& Reason);
 
 private:
-    UPROPERTY()
-    UWorld* WorldWhereTaskWasCalled;
-
     FSlateApplication* SlateApplication = nullptr;
 };

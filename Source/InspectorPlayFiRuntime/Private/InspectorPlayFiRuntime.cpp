@@ -14,4 +14,4 @@ void FInspectorPlayFiRuntimeModule::ShutdownModule()
 
 #undef LOCTEXT_NAMESPACE
 
-IMPLEMENT_MODULE(FInspectorPlayFiRuntimeModule, InspectorPlayFi)
+IMPLEMENT_MODULE(FInspectorPlayFiRuntimeModule, InspectorPlayFiRuntime)

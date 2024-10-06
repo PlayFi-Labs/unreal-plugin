@@ -17,7 +17,6 @@ public:
 
     /** This function will be bound to Command. */
     void PluginButtonClicked();
-    TSharedRef<class SDockTab> OnSpawnPluginTab(const class FSpawnTabArgs& SpawnTabArgs);
 
 private:
     void RegisterMenus();

@@ -6,7 +6,7 @@
 
 void FInspectorPlayFiCommands::RegisterCommands()
 {
-	UI_COMMAND(OpenPluginWindow, "InspectorPlayFi", "Bring up InspectorPlayFi window", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(OpenPluginWindow, "InspectorPlayFi", "Bring up PlayFi Inspector settings", EUserInterfaceActionType::Button, FInputChord());
 }
 
 #undef LOCTEXT_NAMESPACE
