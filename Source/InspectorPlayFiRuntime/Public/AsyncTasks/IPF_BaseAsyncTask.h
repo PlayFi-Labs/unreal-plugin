@@ -20,6 +20,7 @@ public:
     virtual void Activate() override;
 
 protected:
+    
     UPROPERTY()
     UWorld* WorldWhereTaskWasCalled;
 

@@ -9,6 +9,11 @@
 
 class UIPF_SettingsContainer;
 
+/*
+ * The base class of the subsystem with which communication should take place.
+ * Responsible for enabling/disabling the inspector, its settings and their initialization.
+ * It works autonomously at game startup and throughout the session, which means that it can be accessed from any level.
+ */
 UCLASS(Blueprintable, BlueprintType)
 class INSPECTORPLAYFIRUNTIME_API UIPF_InspectorSubsystem : public UGameInstanceSubsystem
 {
@@ -18,7 +23,7 @@ public:
     UPROPERTY(BlueprintReadWrite, Category = "InspectorPlayFi")
     FString UserID;
 
-    // Stores the FColor array of the last image that was successfully sent to the server. Used to check for duplicates.
+    /** Stores the FColor array of the last image that was successfully sent to the server. Used to check for duplicates. */
     TArray<FColor> LastImageColors;
 
 public:

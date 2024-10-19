@@ -12,8 +12,12 @@ UIPF_TakeScreenshotAsyncTask* UIPF_TakeScreenshotAsyncTask::TakeScreenshotAsyncT
         return nullptr;
     }
 
+    // Save the resulting World to retrieve the client's Viewport later during screen image creation.
     Action->WorldWhereTaskWasCalled = WorldContextObject->GetWorld();
+
+    // Register a Task to manually monitor its deletion after it is completed.
     Action->RegisterWithGameInstance(WorldContextObject);
+
     return Action;
 }
 
@@ -33,6 +37,11 @@ void UIPF_TakeScreenshotAsyncTask::Activate()
         return;
     }
 
+    /*
+     * After successful receipt of SlateApplication, we subscribe to the OnBackBufferReadyToPresent delegate,
+     * which when Broadcast returns the texture ready for rendering on the screen,
+     * from which we will get the image for the future screenshot.
+     */
     SlateApplication->GetRenderer()->OnBackBufferReadyToPresent().AddUObject(this, &UIPF_TakeScreenshotAsyncTask::OnBackBufferReady_RenderThread);
 }
 
@@ -57,17 +66,27 @@ void UIPF_TakeScreenshotAsyncTask::OnBackBufferReady_RenderThread(SWindow& Windo
         return;
     }
 
+    /*
+     * Get the current list of render commands that are queued.
+     * Let's use this to get the data for the current rendering of the image on the screen.
+     */
     FRHICommandListImmediate& RHICmdList = GRHICommandList.GetImmediateCommandList();
     const FIntRect CaptureRect(0, 0, ScreenTexture->GetSizeX(), ScreenTexture->GetSizeY());
 
+    /** Read into the FColor array the data for the current image renderer. */
     TArray<FColor> OutColors;
     RHICmdList.ReadSurfaceData(ScreenTexture, CaptureRect, OutColors, FReadSurfaceDataFlags());
 
+    /*
+     * Clear the OnBackBufferReadyToPresent delegate to ignore the following render ready messages.
+     * We are interested in only 1 call, as we take 1 screenshot and that's the end of the task.
+     */
     SlateApplication->GetRenderer()->OnBackBufferReadyToPresent().RemoveAll(this);
 
     const auto InspectorSettings = GetInspectorSettings();
     if (InspectorSettings.bSaveImageToDisk)
     {
+        /** The process of saving an image to disk, if the inspector settings allow it. */
         const TArray<uint8>& Bytes = GetImageBytesFromColors(OutColors, CaptureRect.Width(), CaptureRect.Height());
         const FString FilePath = FPaths::ProjectDir() / InspectorSettings.SaveImageToDiskPath;
         const bool bSavedSuccess = FFileHelper::SaveArrayToFile(Bytes, *FilePath);
@@ -78,6 +97,7 @@ void UIPF_TakeScreenshotAsyncTask::OnBackBufferReady_RenderThread(SWindow& Windo
         }
     }
 
+    /** The task is completed, we can prepare the object for destruction. */
     SetReadyToDestroy();
     OnSuccess.Broadcast("Success", OutColors, CaptureRect.Width(), CaptureRect.Height());
 }

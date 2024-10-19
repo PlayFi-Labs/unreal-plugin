@@ -36,6 +36,10 @@ void UIPF_SendImageToServerAsyncTask::Activate()
 {
     Super::Activate();
 
+    /*
+     * If the DuplicateCheck() check succeeds - this means that we are trying to send an image that is considered a duplicate.
+     * In this case the task ends and prepare for destruction.
+     */
     if (DuplicateCheck())
     {
         LogMessageIfDebugEnabled("Duplicate image. Request canceled.");
@@ -47,10 +51,16 @@ void UIPF_SendImageToServerAsyncTask::Activate()
 
     auto ImageBytes = GetImageBytesFromColors(ImageColors, ImageWidth, ImageHeight);
 
+    /*
+     * The process of creating and filling out an Http Request.
+     * Each parameter in a multipart/form-data request must be separated using a unique Boundary,
+     * which is specified in the inspector settings.
+     */
     const auto HttpRequest = FHttpModule::Get().CreateRequest();
     const auto InspectorSettings = GetInspectorSettings();
     const FString Boundary = InspectorSettings.Boundary;
 
+    /** Setting the request's headers and its endpoint. */
     Endpoint.IsEmpty() ? HttpRequest->SetURL(InspectorSettings.Endpoint) : HttpRequest->SetURL(Endpoint);
     HttpRequest->SetVerb(TEXT("POST"));
     HttpRequest->SetHeader(TEXT("Content-Type"), TEXT("multipart/form-data; boundary=" + Boundary));
@@ -60,16 +70,17 @@ void UIPF_SendImageToServerAsyncTask::Activate()
 
     TArray<uint8> Content;
 
-    const FString ModelIDData = FString::Printf(TEXT("--%s\r\nContent-Disposition: form-data; name=\"model_id\"\r\n\r\n%s\r\n"), *Boundary,
-        ModelID.IsEmpty() ? *InspectorSettings.ModelID : *ModelID);
+    /** Filling the request body with parameters: model_id, config_name, payload, image. */
+    const FString ModelIDData = FString::Printf(
+        TEXT("--%s\r\nContent-Disposition: form-data; name=\"model_id\"\r\n\r\n%s\r\n"), *Boundary, ModelID.IsEmpty() ? *InspectorSettings.ModelID : *ModelID);
     Content.Append(FStringToUint8(ModelIDData));
 
     const FString ConfigNameData = FString::Printf(TEXT("--%s\r\nContent-Disposition: form-data; name=\"config_name\"\r\n\r\n%s\r\n"), *Boundary,
         ConfigName.IsEmpty() ? *InspectorSettings.ConfigName : *ConfigName);
     Content.Append(FStringToUint8(ConfigNameData));
 
-    const FString PayloadData = FString::Printf(TEXT("--%s\r\nContent-Disposition: form-data; name=\"payload\"\r\n\r\n%s\r\n"), *Boundary,
-        Payload.IsEmpty() ? *InspectorSettings.Payload : *Payload);
+    const FString PayloadData = FString::Printf(
+        TEXT("--%s\r\nContent-Disposition: form-data; name=\"payload\"\r\n\r\n%s\r\n"), *Boundary, Payload.IsEmpty() ? *InspectorSettings.Payload : *Payload);
     Content.Append(FStringToUint8(PayloadData));
 
     const FString ImageData = FString::Printf(
@@ -77,6 +88,7 @@ void UIPF_SendImageToServerAsyncTask::Activate()
     Content.Append(FStringToUint8(ImageData));
     Content.Append(ImageBytes);
 
+    /** The requester must also close using Boundary. */
     const FString EndRequestData = FString::Printf(TEXT("\r\n--%s--\r\n"), *Boundary);
     Content.Append(FStringToUint8(EndRequestData));
 
@@ -105,6 +117,7 @@ void UIPF_SendImageToServerAsyncTask::OnResponseReceived(TSharedPtr<IHttpRequest
         return;
     }
 
+    /** We remember the successfully sent FColor array to the server, for future comparison with new images to detect duplicates. */
     InspectorSubsystem->LastImageColors = ImageColors;
 
     OnSuccess.Broadcast(Response->GetResponseCode(), Response->GetContentAsString());
@@ -129,8 +142,7 @@ bool UIPF_SendImageToServerAsyncTask::DuplicateCheck()
 
         if (FMath::Abs(ColorA.R - ColorB.R) < MaxAllowedThresholdForDuplicatedPixel &&
             FMath::Abs(ColorA.G - ColorB.G) < MaxAllowedThresholdForDuplicatedPixel &&
-            FMath::Abs(ColorA.B - ColorB.B) < MaxAllowedThresholdForDuplicatedPixel &&
-            FMath::Abs(ColorA.A - ColorB.A) < MaxAllowedThresholdForDuplicatedPixel)
+            FMath::Abs(ColorA.B - ColorB.B) < MaxAllowedThresholdForDuplicatedPixel && FMath::Abs(ColorA.A - ColorB.A) < MaxAllowedThresholdForDuplicatedPixel)
         {
             MatchingPixels++;
         }
