@@ -1,0 +1,35 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "InspectorLIFT",
+	"Description": "Plugin that is responsible for sending data to LIFT servers from clients.",
+	"Category": "Screen Record",
+	"CreatedBy": "Hryhorenko Yurii",
+	"CreatedByURL": "https://t.me/liemander",
+	"DocsURL": "https://docs.google.com/document/d/18J9gPMA4EJg___haBDeQEew3zVhoa6d8sVUeQOEJZT4/edit?usp=sharing",
+	"MarketplaceURL": "",
+	"SupportURL": "https://t.me/liemander",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "InspectorLIFT",
+			"Type": "Editor",
+			"LoadingPhase": "Default"
+		},
+		{
+			"Name": "InspectorLIFTRuntime",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "EditorScriptingUtilities",
+			"Enabled": true
+		}
+	]
+}
