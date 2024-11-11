@@ -52,7 +52,7 @@ struct FInspectorSettings
 
     /** Endpoint where the request to send screenshots will be made. */
     UPROPERTY(EditDefaultsOnly)
-    FString Endpoint = TEXT("https://processing.dev-aimt.playfi.ai/requests");
+    FString Endpoint = TEXT("https://processing.studio.liftdata.ai/requests");
 
     /** The Boundary to be used when constructing a multipart/form-data request. */
     UPROPERTY(EditDefaultsOnly)
